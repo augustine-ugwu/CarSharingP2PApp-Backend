@@ -28,9 +28,11 @@ const __dirname = path.dirname(__filename);
 // ======================
 app.use(
   cors({
-    origin: isDev
-      ? "http://localhost:5173"
-      : "https://car-sharing-p2-p-app-frontend.vercel.app",
+    origin: "https://car-sharing-p2-p-app-frontend.vercel.app",
+
+    // origin: isDev
+    //   ? "http://localhost:5173"
+    //   : "https://car-sharing-p2-p-app-frontend.vercel.app",
     credentials: true,
   })
 );
