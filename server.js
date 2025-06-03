@@ -30,7 +30,7 @@ app.use(
   cors({
     origin: isDev
       ? "http://localhost:5173"
-      : "https://p2pcarsharing.vercel.app",
+      : "https://car-sharing-p2-p-app-frontend.vercel.app",
     credentials: true,
   })
 );
