@@ -17,25 +17,34 @@ dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 5000;
-const isDev = process.env.NODE_ENV !== "production";
-
-// Resolve __dirname for ES Modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // ======================
-// 🛡️ Middleware
+// 🛡️ CORS Configuration
 // ======================
+const allowedOrigins = [
+  process.env.FRONTEND_URL_LOCAL,
+  process.env.FRONTEND_URL_PRODUCTION.replace(/\/$/, ""), // remove trailing slash
+];
+
 app.use(
   cors({
-    origin: "https://car-sharing-p2-p-app-frontend.vercel.app",
-
-    // origin: isDev
-    //   ? "http://localhost:5173"
-    //   : "https://car-sharing-p2-p-app-frontend.vercel.app",
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        console.error(`❌ CORS blocked origin: ${origin}`);
+        callback(new Error(`CORS policy: Origin ${origin} not allowed.`));
+      }
+    },
     credentials: true,
   })
 );
+
+// ======================
+// 🧩 Middleware
+// ======================
 app.use(express.json());
 
 // ======================

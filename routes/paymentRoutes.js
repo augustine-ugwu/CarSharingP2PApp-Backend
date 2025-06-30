@@ -6,23 +6,21 @@ import paypal from "../config/paypal.js";
 const router = express.Router();
 
 // 🆕 Create PayPal order route
+// POST /api/payments/create-order
 router.post("/create-order", async (req, res) => {
   const { bookingId } = req.body;
 
   if (!bookingId) {
-    return res
-      .status(400)
-      .json({ error: "Booking ID is required to create order" });
+    return res.status(400).json({ error: "Booking ID is required" });
   }
 
   try {
-    // Find the booking by ID to get the price
     const booking = await Booking.findById(bookingId);
     if (!booking) {
       return res.status(404).json({ error: "Booking not found" });
     }
 
-    const request = new paypal.orders.OrdersCreateRequest();
+    const request = new paypal.OrdersCreateRequest();
     request.prefer("return=representation");
     request.requestBody({
       intent: "CAPTURE",
@@ -30,14 +28,25 @@ router.post("/create-order", async (req, res) => {
         {
           amount: {
             currency_code: "USD",
-            value: booking.totalPrice, // Use booking price
+            value: booking.totalPrice,
           },
         },
       ],
     });
 
     const order = await paypal.client().execute(request);
-    res.status(201).json({ orderID: order.result.id }); // Make sure you send 'orderID' back
+
+    // ✅ Save to MongoDB
+    const newOrder = new Order({
+      bookingId,
+      user: booking.user,
+      totalPrice: booking.totalPrice,
+      paypalOrderId: order.result.id,
+      isPaid: false,
+    });
+    await newOrder.save();
+
+    res.status(201).json({ orderID: order.result.id });
   } catch (err) {
     console.error("❌ Failed to create PayPal order:", err);
     res.status(500).json({ error: "Failed to create PayPal order" });

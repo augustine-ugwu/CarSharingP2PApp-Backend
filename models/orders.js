@@ -6,6 +6,10 @@ const orderSchema = new mongoose.Schema({
     required: true,
     ref: "Booking",
   },
+  paypalOrderId: {
+    type: String,
+    required: true,
+  },
   user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   totalPrice: { type: Number, required: true },
   isPaid: { type: Boolean, default: false },
